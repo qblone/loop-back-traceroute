@@ -5,8 +5,27 @@ In this tutorial, we explain the steps to build a SQL query to find the origin A
 #### Finding traceroutes with `::` in hops
 We start by querying the traceroute table ( `prod - atlas - project.atlas_measurements.traceroute`) to find all the hops. It may be helpful to have a glance at the [traceroute schema table](https://github.com/RIPE-NCC/ripe-atlas-bigquery/blob/fea4b68f251bd4f72e482cfc3803aaa98de4abab/docs/measurements_traceroute.md)
 
-
+```sql
+WITH loopback_traces AS 
+(
+   SELECT
+      prb_id,
+      src_addr,
+      dst_addr,
+      hops 
+   FROM
+      `prod-atlas-project.atlas_measurements.traceroute`,
+      UNNEST (hops) AS hop 
+   WHERE
+      DATE(start_time) = "2022-04-20" 
+      AND hop.hop_addr = '::' 
+      AND dst_addr != '::' 
+)
 ```
+Note that we have to unnest the hops since they are NESTED schema to filter results on the hops
+
+
+```sql
 WITH loopback_traces AS 
 (
    SELECT
