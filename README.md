@@ -3,7 +3,7 @@
 In this tutorial, we explain the steps to build a SQL query to find the origin AS before or after  `::` in the traceroute dataset. 
 
 #### Finding traceroutes with `::` in hops
-We start by querying the traceroute table ( `prod - atlas - project.atlas_measurements.traceroute`) to find all the hops. It may be helpful to have a glance at the [traceroute schema table] (https://github.com/RIPE-NCC/ripe-atlas-bigquery/blob/fea4b68f251bd4f72e482cfc3803aaa98de4abab/docs/measurements_traceroute.md)
+We start by querying the traceroute table ( `prod - atlas - project.atlas_measurements.traceroute`) to find all the hops. It may be helpful to have a glance at the [traceroute schema table](https://github.com/RIPE-NCC/ripe-atlas-bigquery/blob/fea4b68f251bd4f72e482cfc3803aaa98de4abab/docs/measurements_traceroute.md)
 
 ```
 loopback_traces AS 
