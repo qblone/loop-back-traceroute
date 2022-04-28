@@ -1,6 +1,6 @@
 ## Detecting::/128 in traceroute data 
 
-In this tutorial, we explain the steps to build a SQL query to find the origin AS before or after  `::` in the traceroute dataset. 
+In this tutorial, we explain the steps to build a SQL query to find the origin AS before or after  `::` in the traceroute dataset. You can find the query at the end of the document. In the following section, we give step by step breakdown of the query. 
 
 #### 1. Finding traceroutes with `::` in hops
 We start by querying the traceroute table ( `prod - atlas - project.atlas_measurements.traceroute`) to find all the hops. It may be helpful to have a glance at the [traceroute schema table](https://github.com/RIPE-NCC/ripe-atlas-bigquery/blob/fea4b68f251bd4f72e482cfc3803aaa98de4abab/docs/measurements_traceroute.md)
@@ -95,9 +95,51 @@ annotate_traceroute AS
 ```
 To understand this part of the query, start with the syntax after `from` marked as `(1)`. In this part, we fetch all the IP to origin AS pairs mapped in the RIS table. In the second part,marked as `(2)`, we merge all the hops that had missing origin AS information. 
 
-#### Get unique pairs
+#### 4. Get unique pairs
+Traceroute sends three packets for each hop. In our dataset, we have three responses from the same hop. Since we are only interested in topology, we discard the additional information andonly keep unique hops. 
+
+```sql
+unique as 
+(
+   select
+      * REPLACE( (
+      SELECT
+         ARRAY_AGG(STRUCT(hop_addr, origin, hop)) --struct
+      FROM
+         (
+            SELECT DISTINCT
+               hop_addr,
+               origin,
+               hop 
+            FROM
+               UNNEST(hops) c 
+         )
+) AS hops ) 
+      FROM
+         annotate_traceroute
+)
+```
+####5. Correct the order of hops
+Finally, we correct the order of the hops and select the final dataset for further analysis. 
+```sql
+select
+   prb_id,
+   src_addr,
+   dst_addr,
+   ARRAY(
+   SELECT
+      STRUCT (hop_addr, origin, hop) 
+   FROM
+      UNNEST(hops) AS hops 
+   ORDER BY
+      hop) AS hops 
+   from
+      unique
+```
 
 
+
+## Complete Query
 
 
 
